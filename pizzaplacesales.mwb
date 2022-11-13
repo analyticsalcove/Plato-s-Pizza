@@ -1,0 +1,66 @@
+USE pizzaplacesales;
+-- All datatypes were changed to appropriate types, for example some were text but needed to be varchar
+
+SELECT * FROM 
+	order_details; -- shows different pizza names and quantities ordered, 5941 rows, I changed DBM to make "order_details_id" a primary key & 
+                   -- all columns non-null & "order_id" & "pizza_id" foreign keys
+    
+SELECT * FROM 
+	orders; -- shows date & time of all 21,350 orders from 01/01/15-12/31/15, also I changed DBM to make "order_id" a primary key & all columns non-null
+    
+SELECT * FROM 
+	pizza_types; -- there are 32 different types of pizzas, "pizza_type_id" was made into primary key & all columns changed to non-null in the DBM
+    
+ SELECT * FROM 
+	pizzas; -- shows the size, type and price of each pizza, there are 96 kinds of pizzas (the 32 different types in 3 sizes each), "pizza_id" was made into 
+		    -- a primary key & "pizza_type_id" was made a foreign key, all columns changed to non-null in the DBM
+    
+-- How many customers do we have each day? 
+SELECT date,
+     COUNT(order_id) AS customers_per_day
+  FROM 
+	orders
+ GROUP BY 
+	date;
+
+-- Are there any peak hours?
+SELECT
+	time,
+     COUNT(order_id) AS customers_per_hour
+  FROM 
+	orders
+ GROUP BY 
+	time
+ORDER BY
+	customers_per_hour DESC;
+
+-- How many pizzas are typically in an order? 
+
+SELECT 
+    AVG(quantity) AS typical_pizza_order_total
+FROM 
+	order_details;
+
+-- Do we have any bestsellers?
+-- This is where I got tripped up...
+SELECT * 
+FROM 
+	order_details
+LEFT JOIN
+	pizzas
+    ON order_details.pizza_id=pizzas.pizza_id;
+
+
+    
+    
+    
+-- How much money did we make this year? 
+
+
+
+-- Can we indentify any seasonality in the sales?
+
+
+
+-- Are there any pizzas we should take off the menu, or any promotions we could leverage?
+
