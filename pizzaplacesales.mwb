@@ -16,8 +16,9 @@ SELECT * FROM
 		    -- a primary key & "pizza_type_id" was made a foreign key, all columns changed to non-null in the DBM
     
 -- How many customers do we have each day? 
-SELECT date,
-     COUNT(order_id) AS customers_per_day
+SELECT 
+	date,
+    COUNT(order_id) AS customers_per_day
   FROM 
 	orders
  GROUP BY 
@@ -25,42 +26,62 @@ SELECT date,
 
 -- Are there any peak hours?
 SELECT
-	time,
+	 left(time,2) AS hour,
      COUNT(order_id) AS customers_per_hour
   FROM 
 	orders
  GROUP BY 
-	time
+	left(time,2)
 ORDER BY
-	customers_per_hour DESC;
+    hour;
 
 -- How many pizzas are typically in an order? 
-
 SELECT 
-    AVG(quantity) AS typical_pizza_order_total
+    SUM(quantity)/COUNT(distinct order_id) AS typical_pizza_order_total
 FROM 
 	order_details;
 
 -- Do we have any bestsellers?
--- This is where I got tripped up...
-SELECT * 
-FROM 
-	order_details
-LEFT JOIN
-	pizzas
-    ON order_details.pizza_id=pizzas.pizza_id;
-
-
-    
-    
+SELECT 
+	pizzas.pizza_type_id,
+	SUM(order_details.quantity) AS sales 
+FROM order_details 
+LEFT JOIN pizzas 
+ON order_details.pizza_id = pizzas.pizza_id 
+GROUP BY pizzas.pizza_type_id 
+ORDER BY sum(order_details.quantity) desc
+LIMIT 3;   
     
 -- How much money did we make this year? 
+SELECT
+	SUM(order_details.quantity)*pizzas.price AS yearly_earnings
+FROM 
+	order_details
+LEFT JOIN pizzas 
+ON order_details.pizza_id = pizzas.pizza_id;
 
-
+-- How much money did we make per pizza?
+SELECT
+	SUM(pizzas.price)/SUM(order_details.quantity) AS price_per_pizza
+FROM order_details 
+LEFT JOIN pizzas 
+ON order_details.pizza_id = pizzas.pizza_id;    
 
 -- Can we indentify any seasonality in the sales?
-
-
+SELECT 
+	order_details.quantity,
+	orders.order_id,
+	COUNT(CASE WHEN date BETWEEN 2015-12-1 AND 2015-2-30 THEN order_details.quantity ELSE NULL END) AS Winter,
+    COUNT(CASE WHEN date BETWEEN 2015-3-1 AND 2015-5-31 THEN order_details.quantity ELSE NULL END) AS Spring,
+    COUNT(CASE WHEN date BETWEEN 2015-6-1 AND 2015-8-31 THEN order_details.quantity ELSE NULL END) AS Summer,
+    COUNT(CASE WHEN date BETWEEN 2015-9-1 AND 2015-11-30 THEN order_details.quantity ELSE NULL END) AS Fall
+FROM 
+	orders
+LEFT JOIN order_details 
+ON orders.order_id = order_details.order_id
+GROUP BY
+	order_details.quantity
+ORDER BY
+	order_details.quantity;
 
 -- Are there any pizzas we should take off the menu, or any promotions we could leverage?
-
