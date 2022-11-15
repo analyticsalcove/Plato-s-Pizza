@@ -1,18 +1,18 @@
-USE pizzaplacesales;
+USE pizza;
 -- All datatypes were changed to appropriate types, for example some were text but needed to be varchar
 
 SELECT * FROM 
-	order_details; -- shows different pizza names and quantities ordered, 5941 rows, I changed DBM to make "order_details_id" a primary key & 
+	pizza.order_details; -- shows different pizza names and quantities ordered, 5941 rows, I changed DBM to make "order_details_id" a primary key & 
                    -- all columns non-null & "order_id" & "pizza_id" foreign keys
     
 SELECT * FROM 
-	orders; -- shows date & time of all 21,350 orders from 01/01/15-12/31/15, also I changed DBM to make "order_id" a primary key & all columns non-null
+	pizza.orders; -- shows date & time of all 21,350 orders from 01/01/15-12/31/15, also I changed DBM to make "order_id" a primary key & all columns non-null
     
 SELECT * FROM 
-	pizza_types; -- there are 32 different types of pizzas, "pizza_type_id" was made into primary key & all columns changed to non-null in the DBM
+	pizza.pizza_types; -- there are 32 different types of pizzas, "pizza_type_id" was made into primary key & all columns changed to non-null in the DBM
     
  SELECT * FROM 
-	pizzas; -- shows the size, type and price of each pizza, there are 96 kinds of pizzas (the 32 different types in 3 sizes each), "pizza_id" was made into 
+	pizza.pizzas; -- shows the size, type and price of each pizza, there are 96 kinds of pizzas (the 32 different types in 3 sizes each), "pizza_id" was made into 
 		    -- a primary key & "pizza_type_id" was made a foreign key, all columns changed to non-null in the DBM
     
 -- How many customers do we have each day? 
@@ -23,6 +23,18 @@ SELECT
 	orders
  GROUP BY 
 	date;
+    
+-- So the average number of customers each day:
+SELECT
+	AVG(customer_count) AS avg_customer_count
+FROM
+	(
+	SELECT
+		COUNT(DISTINCT date) AS customer_count
+	FROM
+		orders
+        )
+	AS counts;
 
 -- Are there any peak hours?
 SELECT
@@ -41,7 +53,7 @@ SELECT
 FROM 
 	order_details;
 
--- Do we have any bestsellers?
+-- Do we have any bestsellers? By Quantity
 SELECT 
 	pizzas.pizza_type_id,
 	SUM(order_details.quantity) AS sales 
@@ -52,9 +64,43 @@ GROUP BY pizzas.pizza_type_id
 ORDER BY sum(order_details.quantity) desc
 LIMIT 3;   
     
--- How much money did we make this year? 
+-- Do we have any bestsellers? Revenue
+SELECT 
+	pizzas.pizza_type_id,
+	SUM((order_details.quantity)*(pizzas.price)) AS sales 
+FROM order_details 
+LEFT JOIN pizzas 
+ON order_details.pizza_id = pizzas.pizza_id 
+GROUP BY pizzas.pizza_type_id 
+ORDER BY SUM((order_details.quantity)*(pizzas.price)) desc
+LIMIT 3; 
+    
+-- What is the worst selling pizza?
+SELECT 
+	pizzas.pizza_type_id,
+	SUM(order_details.quantity) AS sales 
+FROM order_details 
+LEFT JOIN pizzas 
+ON order_details.pizza_id = pizzas.pizza_id 
+GROUP BY pizzas.pizza_type_id 
+ORDER BY sum(order_details.quantity)
+LIMIT 3;   
+    
+-- How many pizzas did we make this year?
 SELECT
-	SUM(order_details.quantity)*pizzas.price AS yearly_earnings
+	SUM(quantity)
+FROM
+	order_details;
+    
+-- How many orders were placed this year?
+SELECT
+	COUNT(order_id)
+FROM
+	orders;
+    
+-- Total Revenue: How much money did we make this year? 
+SELECT
+	SUM((order_details.quantity)*pizzas.price) AS yearly_earnings
 FROM 
 	order_details
 LEFT JOIN pizzas 
@@ -66,6 +112,19 @@ SELECT
 FROM order_details 
 LEFT JOIN pizzas 
 ON order_details.pizza_id = pizzas.pizza_id;    
+
+-- How much money did we make per pizza? Average formula
+SELECT
+	AVG((pizzas.price)*(order_details.quantity)) AS price_per_pizza
+FROM order_details
+LEFT JOIN pizzas
+ON order_details.pizza_id = pizzas.pizza_id;
+
+-- Number of Ingredients
+SELECT
+	
+FROM
+	pizza_types;
 
 -- Can we indentify any seasonality in the sales?
 SELECT 
@@ -83,5 +142,7 @@ GROUP BY
 	order_details.quantity
 ORDER BY
 	order_details.quantity;
+	
+-- Seating and table availability throughout the day
 
 -- Are there any pizzas we should take off the menu, or any promotions we could leverage?
