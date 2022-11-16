@@ -1,0 +1,203 @@
+USE pizza;
+-- All datatypes were changed to appropriate types, for example some were text but needed to be varchar
+
+SELECT * FROM 
+	pizza.order_details; -- shows different pizza names and quantities ordered, 5941 rows, I changed DBM to make "order_details_id" a primary key & 
+                   -- all columns non-null & "order_id" & "pizza_id" foreign keys
+    
+SELECT * FROM 
+	pizza.orders; -- shows date & time of all 21,350 orders from 01/01/15-12/31/15, also I changed DBM to make "order_id" a primary key & all columns non-null
+    
+SELECT * FROM 
+	pizza.pizza_types; -- there are 32 different types of pizzas, "pizza_type_id" was made into primary key & all columns changed to non-null in the DBM
+    
+ SELECT * FROM 
+	pizza.pizzas; -- shows the size, type and price of each pizza, there are 96 kinds of pizzas (the 32 different types in 3 sizes each), "pizza_id" was made into 
+		    -- a primary key & "pizza_type_id" was made a foreign key, all columns changed to non-null in the DBM
+    
+-- How many customers do we have each day? 
+SELECT 
+	date,
+COUNT(order_id) AS customers_per_day
+FROM 
+	orders
+GROUP BY 
+	date;
+
+-- How many customers do we average per day?
+SELECT
+	COUNT(order_id)/358 AS avg_daily_customers
+FROM 
+	orders;
+
+-- Are there any peak hours?
+SELECT
+	 left(time,2) AS hour,
+     COUNT(order_id) AS customers_per_hour
+  FROM 
+	orders
+ GROUP BY 
+	left(time,2)
+ORDER BY
+    hour;
+
+-- How many pizzas are typically in an order? 
+SELECT 
+    SUM(quantity)/COUNT(distinct order_id) AS typical_pizza_order_total
+FROM 
+	order_details;
+
+-- Do we have any bestsellers? By Quantity
+SELECT 
+	pizzas.pizza_type_id,
+	SUM(order_details.quantity) AS sales 
+FROM order_details 
+LEFT JOIN pizzas 
+ON order_details.pizza_id = pizzas.pizza_id 
+GROUP BY pizzas.pizza_type_id 
+ORDER BY sum(order_details.quantity) desc
+LIMIT 3;   
+    
+-- Do we have any bestsellers? Revenue
+SELECT 
+	pizzas.pizza_type_id,
+	SUM((order_details.quantity)*(pizzas.price)) AS sales 
+FROM order_details 
+LEFT JOIN pizzas 
+ON order_details.pizza_id = pizzas.pizza_id 
+GROUP BY pizzas.pizza_type_id 
+ORDER BY SUM((order_details.quantity)*(pizzas.price)) desc
+LIMIT 3; 
+    
+-- What is the worst selling pizza?
+SELECT 
+	pizzas.pizza_type_id,
+	SUM(order_details.quantity) AS sales 
+FROM 
+	order_details 
+LEFT JOIN pizzas 
+ON order_details.pizza_id = pizzas.pizza_id 
+GROUP BY 
+	pizzas.pizza_type_id 
+ORDER BY 
+	SUM(order_details.quantity)
+LIMIT 3;   
+    
+-- How many pizzas did we make this year?
+SELECT
+	SUM(quantity)
+FROM
+	order_details;
+    
+-- How many orders were placed this year?
+SELECT
+	COUNT(order_id)
+FROM
+	orders;
+    
+-- Total Revenue: How much money did we make this year? 
+SELECT
+	SUM((order_details.quantity)*pizzas.price) AS yearly_earnings
+FROM 
+	order_details
+LEFT JOIN pizzas 
+ON order_details.pizza_id = pizzas.pizza_id;
+
+-- How much money did we make per pizza?
+SELECT
+	SUM(quantity*price)/SUM(order_details.quantity) AS price_per_pizza
+FROM order_details 
+LEFT JOIN pizzas 
+ON order_details.pizza_id = pizzas.pizza_id;    
+
+-- How much money did we make per pizza? Average price per pizza:
+SELECT
+	SUM(quantity*price)/SUM(order_details.quantity) AS price_per_pizza
+FROM order_details 
+LEFT JOIN pizzas 
+ON order_details.pizza_id = pizzas.pizza_id; 
+
+-- Variety of pizzas types 
+SELECT
+	DISTINCT(name) 
+FROM
+	pizza_types;
+-- Count of variety of pizzas
+SELECT
+	COUNT(DISTINCT(name))
+FROM
+	pizza_types;
+    
+-- Orders by pizza size
+SELECT
+	size, SUM(quantity)
+FROM
+	pizzas
+JOIN
+	order_details
+ON pizzas.pizza_id = order_details.pizza_id
+GROUP BY 
+	size
+ORDER BY
+	size;
+    
+-- Dates with most orders
+SELECT
+	date, SUM(quantity) 
+FROM
+	orders
+JOIN
+	order_details
+ON orders.order_id=order_details.order_id
+GROUP BY
+	date
+ORDER BY
+	SUM(quantity) DESC;
+
+-- Can we indentify any seasonality in the sales?
+SELECT 
+	SUM(quantity), SUM(order_id)
+FROM 
+	orders
+JOIN 
+order_details 
+ON orders.order_id = order_details.order_id
+WHERE 
+	date BETWEEN CAST('2015-01-01' AS DATE)  AND  CAST('2015-02-30' AS DATE)  OR date >= CAST('2015-12-01' AS DATE) AS 'winter',
+WHERE
+	date BETWEEN CAST('2015-03-01' AS DATE) AND  CAST('2015-05-31' AS DATE) AS 'spring',
+WHERE
+	date BETWEEN CAST('2015-06-01' AS DATE) AND  CAST('2015-08-31' AS DATE) AS 'summer',
+WHERE
+	date BETWEEN CAST('2015-09-01' AS DATE) AND  CAST('2015-11-30' AS DATE) AS 'fall'
+GROUP BY
+	SUM(quantity)
+ORDER BY
+	SUM(quantity) DESC;
+	
+	
+-- Seating and table availability throughout the day
+-- So peak selling times are:
+SELECT 
+	time, COUNT(quantity) AS total_sales
+FROM
+	orders
+JOIN
+	order_details
+ON orders.order_id = order_details.order_id
+GROUP BY time
+ORDER BY COUNT(quantity) DESC;
+
+-- Are there any pizzas we should take off the menu, or any promotions we could leverage?
+SELECT 
+	pizzas.pizza_type_id,
+	SUM(order_details.quantity) AS sales 
+FROM 
+	order_details 
+LEFT JOIN pizzas 
+ON order_details.pizza_id = pizzas.pizza_id 
+GROUP BY 
+	pizzas.pizza_type_id 
+ORDER BY 
+	sum(order_details.quantity)
+LIMIT 3; 
