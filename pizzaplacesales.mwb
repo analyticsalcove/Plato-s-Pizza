@@ -79,11 +79,14 @@ LIMIT 3;
 SELECT 
 	pizzas.pizza_type_id,
 	SUM(order_details.quantity) AS sales 
-FROM order_details 
+FROM 
+	order_details 
 LEFT JOIN pizzas 
 ON order_details.pizza_id = pizzas.pizza_id 
-GROUP BY pizzas.pizza_type_id 
-ORDER BY sum(order_details.quantity)
+GROUP BY 
+	pizzas.pizza_type_id 
+ORDER BY 
+	SUM(order_details.quantity)
 LIMIT 3;   
     
 -- How many pizzas did we make this year?
@@ -108,17 +111,17 @@ ON order_details.pizza_id = pizzas.pizza_id;
 
 -- How much money did we make per pizza?
 SELECT
-	SUM(pizzas.price)/SUM(order_details.quantity) AS price_per_pizza
+	SUM(quantity*price)/SUM(order_details.quantity) AS price_per_pizza
 FROM order_details 
 LEFT JOIN pizzas 
 ON order_details.pizza_id = pizzas.pizza_id;    
 
 -- How much money did we make per pizza? Average formula
 SELECT
-	AVG((pizzas.price)*(order_details.quantity)) AS price_per_pizza
-FROM order_details
-LEFT JOIN pizzas
-ON order_details.pizza_id = pizzas.pizza_id;
+	SUM(quantity*price)/SUM(order_details.quantity) AS price_per_pizza
+FROM order_details 
+LEFT JOIN pizzas 
+ON order_details.pizza_id = pizzas.pizza_id; 
 
 -- Number of Ingredients
 SELECT
@@ -146,3 +149,17 @@ ORDER BY
 -- Seating and table availability throughout the day
 
 -- Are there any pizzas we should take off the menu, or any promotions we could leverage?
+SELECT 
+	pizzas.pizza_type_id,
+	SUM(order_details.quantity) AS sales 
+FROM 
+	order_details 
+LEFT JOIN pizzas 
+ON order_details.pizza_id = pizzas.pizza_id 
+GROUP BY 
+	pizzas.pizza_type_id 
+ORDER BY 
+	sum(order_details.quantity)
+LIMIT 3; 
+
+
