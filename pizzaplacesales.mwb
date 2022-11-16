@@ -18,12 +18,18 @@ SELECT * FROM
 -- How many customers do we have each day? 
 SELECT 
 	date,
-    COUNT(order_id) AS customers_per_day
-  FROM 
+COUNT(order_id) AS customers_per_day
+FROM 
 	orders
- GROUP BY 
+GROUP BY 
 	date;
-    
+
+-- How many customers do we average per day?
+SELECT
+	COUNT(order_id)/358 AS avg_daily_customers
+FROM 
+	orders;
+
 -- So the average number of customers each day:
 SELECT
 	AVG(customer_count) AS avg_customer_count
@@ -131,20 +137,22 @@ FROM
 
 -- Can we indentify any seasonality in the sales?
 SELECT 
-	order_details.quantity,
-	orders.order_id,
-	COUNT(CASE WHEN date BETWEEN 2015-12-1 AND 2015-2-30 THEN order_details.quantity ELSE NULL END) AS Winter,
-    COUNT(CASE WHEN date BETWEEN 2015-3-1 AND 2015-5-31 THEN order_details.quantity ELSE NULL END) AS Spring,
-    COUNT(CASE WHEN date BETWEEN 2015-6-1 AND 2015-8-31 THEN order_details.quantity ELSE NULL END) AS Summer,
-    COUNT(CASE WHEN date BETWEEN 2015-9-1 AND 2015-11-30 THEN order_details.quantity ELSE NULL END) AS Fall
+	SUM(order_details.quantity),
+	SUM(orders.order_id)
 FROM 
 	orders
 LEFT JOIN order_details 
 ON orders.order_id = order_details.order_id
+WHERE 
+	date BETWEEN 2015-12-1 AND 2015-2-30
 GROUP BY
 	order_details.quantity
 ORDER BY
 	order_details.quantity;
+	
+date BETWEEN 2015-3-1 AND 2015-5-31
+date BETWEEN 2015-6-1 AND 2015-8-31
+date BETWEEN 2015-9-1 AND 2015-11-30
 	
 -- Seating and table availability throughout the day
 
