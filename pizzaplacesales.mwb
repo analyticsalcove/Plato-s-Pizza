@@ -15,7 +15,19 @@ SELECT * FROM
 	pizza.pizzas; -- shows the size, type and price of each pizza, there are 96 kinds of pizzas (the 32 different types in 3 sizes each), "pizza_id" was made into 
 		    -- a primary key & "pizza_type_id" was made a foreign key, all columns changed to non-null in the DBM
     
--- How many customers do we have each day? 
+-- How many pizzas did we make this year?
+SELECT
+	SUM(quantity)
+FROM
+	order_details;
+    
+-- How many orders were placed this year?
+SELECT
+	COUNT(order_id)
+FROM
+	orders;
+
+-- How many customers do we have each day throughout the whole year? 
 SELECT 
 	date,
 COUNT(order_id) AS customers_per_day
@@ -81,7 +93,7 @@ GROUP BY pizzas.pizza_type_id
 ORDER BY SUM((order_details.quantity)*(pizzas.price)) desc
 LIMIT 3; 
     
--- What is the worst selling pizza?
+-- What is the worst selling pizza? By Quantity
 SELECT 
 	pizzas.pizza_type_id,
 	SUM(order_details.quantity) AS sales 
@@ -94,18 +106,17 @@ GROUP BY
 ORDER BY 
 	SUM(order_details.quantity)
 LIMIT 3;   
-    
--- How many pizzas did we make this year?
-SELECT
-	SUM(quantity)
-FROM
-	order_details;
-    
--- How many orders were placed this year?
-SELECT
-	COUNT(order_id)
-FROM
-	orders;
+
+-- What is the worst selling pizza? Revenue
+SELECT 
+	pizzas.pizza_type_id,
+	SUM((order_details.quantity)*(pizzas.price)) AS sales 
+FROM order_details 
+LEFT JOIN pizzas 
+ON order_details.pizza_id = pizzas.pizza_id 
+GROUP BY pizzas.pizza_type_id 
+ORDER BY SUM((order_details.quantity)*(pizzas.price))
+LIMIT 3;
     
 -- Total Revenue: How much money did we make this year? 
 SELECT
@@ -136,38 +147,14 @@ FROM
 	pizza_types;
 
 -- Can we indentify any seasonality in the sales?
-SELECT 
-	SUM(order_details.quantity),
-	SUM(orders.order_id)
+SELECT  
+   MONTH (date) AS month,  
+   COUNT(order_id) AS pizzas_sold
 FROM 
-	orders
-LEFT JOIN order_details 
-ON orders.order_id = order_details.order_id
-WHERE 
-	date BETWEEN 2015-12-1 AND 2015-2-30
-GROUP BY
-	order_details.quantity
-ORDER BY
-	order_details.quantity;
-	
-date BETWEEN 2015-3-1 AND 2015-5-31
-date BETWEEN 2015-6-1 AND 2015-8-31
-date BETWEEN 2015-9-1 AND 2015-11-30
+   orders
+GROUP BY MONTH (date)
+ORDER BY MONTH (date);
 	
 -- Seating and table availability throughout the day
-
--- Are there any pizzas we should take off the menu, or any promotions we could leverage?
-SELECT 
-	pizzas.pizza_type_id,
-	SUM(order_details.quantity) AS sales 
-FROM 
-	order_details 
-LEFT JOIN pizzas 
-ON order_details.pizza_id = pizzas.pizza_id 
-GROUP BY 
-	pizzas.pizza_type_id 
-ORDER BY 
-	sum(order_details.quantity)
-LIMIT 3; 
 
 
