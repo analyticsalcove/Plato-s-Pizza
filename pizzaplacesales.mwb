@@ -133,18 +133,6 @@ FROM order_details
 LEFT JOIN pizzas 
 ON order_details.pizza_id = pizzas.pizza_id;    
 
--- How much money did we make per pizza? Average formula
-SELECT
-	SUM(quantity*price)/SUM(order_details.quantity) AS price_per_pizza
-FROM order_details 
-LEFT JOIN pizzas 
-ON order_details.pizza_id = pizzas.pizza_id; 
-
--- Number of Ingredients
-SELECT
-	
-FROM
-	pizza_types;
 
 -- Can we indentify any seasonality in the sales?
 SELECT  
@@ -154,7 +142,42 @@ FROM
    orders
 GROUP BY MONTH (date)
 ORDER BY MONTH (date);
+
+-- Dates with most orders
+SELECT
+	date, SUM(quantity) 
+FROM
+	orders
+JOIN
+	order_details
+ON orders.order_id=order_details.order_id
+GROUP BY
+	date
+ORDER BY
+	SUM(quantity) DESC;
+	
+-- Orders by pizza size
+SELECT
+	size, SUM(quantity)
+FROM
+	pizzas
+JOIN
+	order_details
+ON pizzas.pizza_id = order_details.pizza_id
+GROUP BY 
+	size
+ORDER BY
+	size;
+	
 	
 -- Seating and table availability throughout the day
-
-
+-- So peak selling times are:
+SELECT
+	 LEFT(time,4) AS hour_min
+     COUNT(order_id) AS customers
+  FROM 
+	orders
+ GROUP BY 
+	LEFT(time,4) 
+ORDER BY
+    COUNT(order_id);
