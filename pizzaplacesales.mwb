@@ -82,6 +82,32 @@ GROUP BY pizzas.pizza_type_id
 ORDER BY sum(order_details.quantity) desc
 LIMIT 3;   
     
+-- Orders by pizza size
+SELECT
+	size, SUM(quantity)
+FROM
+	pizzas
+JOIN
+	order_details
+ON pizzas.pizza_id = order_details.pizza_id
+GROUP BY 
+	size
+ORDER BY
+	size;
+	
+	
+-- Variety of pizzas types 
+SELECT
+	DISTINCT(name) 
+FROM
+	pizza_types;
+-- Count of variety of pizzas
+SELECT
+	COUNT(DISTINCT(name))
+FROM
+	pizza_types;
+    
+    
 -- Do we have any bestsellers? Revenue
 SELECT 
 	pizzas.pizza_type_id,
@@ -155,19 +181,6 @@ GROUP BY
 	date
 ORDER BY
 	SUM(quantity) DESC;
-	
--- Orders by pizza size
-SELECT
-	size, SUM(quantity)
-FROM
-	pizzas
-JOIN
-	order_details
-ON pizzas.pizza_id = order_details.pizza_id
-GROUP BY 
-	size
-ORDER BY
-	size;
 	
 	
 -- Seating and table availability throughout the day
