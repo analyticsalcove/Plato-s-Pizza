@@ -122,6 +122,7 @@ SELECT
 	DISTINCT(name) 
 FROM
 	pizza_types;
+	
 -- Count of variety of pizzas
 SELECT
 	COUNT(DISTINCT(name))
