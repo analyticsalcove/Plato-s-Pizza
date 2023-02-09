@@ -36,7 +36,6 @@ FROM
 	orders;
 -- average daily customers: 59.64
 
-
 -- Are there any peak hours?
 SELECT
 	 left(time,2) AS hour,
@@ -47,6 +46,31 @@ SELECT
 	left(time,2)
 ORDER BY
     hour;
+    
+-- Are there peak days of the week?
+SELECT 
+  HOUR(orders.date) AS hour, 
+  DAYNAME(orders.date) AS day_of_week, 
+  SUM(pizzas.price * order_details.quantity) AS total_sales
+FROM 
+  pizzas 
+  INNER JOIN order_details ON pizzas.pizza_id = order_details.pizza_id 
+  INNER JOIN orders ON order_details.order_id = orders.order_id
+GROUP BY 
+  hour, 
+  day_of_week
+ORDER BY 
+  hour, 
+  CASE 
+    WHEN day_of_week = 'Monday' THEN 1 
+    WHEN day_of_week = 'Tuesday' THEN 2 
+    WHEN day_of_week = 'Wednesday' THEN 3 
+    WHEN day_of_week = 'Thursday' THEN 4 
+    WHEN day_of_week = 'Friday' THEN 5 
+    WHEN day_of_week = 'Saturday' THEN 6 
+    ELSE 7 
+  END;
+
 
 -- How many pizzas are typically in an order? 
 SELECT 
@@ -112,7 +136,32 @@ SELECT
 FROM
 	pizza_types;
 -- 32 types of pizzas are sold
-    
+
+-- Monthly revenue 
+SELECT 
+  DATE_FORMAT(orders.date, '%Y-%m') AS month, 
+  SUM(pizzas.price * order_details.quantity) AS monthly_revenue
+FROM 
+  pizzas 
+  INNER JOIN order_details ON pizzas.pizza_id = order_details.pizza_id 
+  INNER JOIN orders ON order_details.order_id = orders.order_id
+GROUP BY 
+  month
+ORDER BY 
+  month;
+
+-- Monthly quantity
+SELECT 
+  DATE_FORMAT(orders.date, '%Y-%m') AS month, 
+  SUM(order_details.quantity) AS monthly_quantity
+FROM 
+  order_details 
+  INNER JOIN orders ON order_details.order_id = orders.order_id
+GROUP BY 
+  month
+ORDER BY 
+  month;
+ 
 -- Orders by pizza size
 SELECT
 	size, SUM(quantity)
@@ -125,7 +174,8 @@ GROUP BY
 	size
 ORDER BY
 	size;
-    
+-- there were only 28 XXL pizzas sold all year, 552 XL. That accounts for only 2% of the total 49,574 pizzas sold
+
 -- Dates with most orders
 SELECT
 	date, SUM(quantity) 
