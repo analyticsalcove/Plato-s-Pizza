@@ -2,18 +2,22 @@ USE pizza;
 -- All datatypes were changed to appropriate types, for example some were text but needed to be varchar
 
 SELECT * FROM 
-	pizza.order_details; -- shows different pizza names and quantities ordered, 5941 rows, I changed DBM to make "order_details_id" a primary key & 
-                   -- all columns non-null & "order_id" & "pizza_id" foreign keys
+	pizza.order_details; 
+-- shows different pizza names and quantities ordered, 5941 rows, I changed DBM to make "order_details_id" a primary key & 
+-- all columns non-null & "order_id" & "pizza_id" foreign keys
     
 SELECT * FROM 
-	pizza.orders; -- shows date & time of all 21,350 orders from 01/01/15-12/31/15, also I changed DBM to make "order_id" a primary key & all columns non-null
+	pizza.orders; 
+-- shows date & time of all 21,350 orders from 01/01/15-12/31/15, also I changed DBM to make "order_id" a primary key & all columns non-null
     
 SELECT * FROM 
-	pizza.pizza_types; -- there are 32 different types of pizzas, "pizza_type_id" was made into primary key & all columns changed to non-null in the DBM
+	pizza.pizza_types; 
+-- there are 32 different types of pizzas, "pizza_type_id" was made into primary key & all columns changed to non-null in the DBM
     
  SELECT * FROM 
-	pizza.pizzas; -- shows the size, type and price of each pizza, there are 96 kinds of pizzas (the 32 different types in 3 sizes each), "pizza_id" was made into 
-		    -- a primary key & "pizza_type_id" was made a foreign key, all columns changed to non-null in the DBM
+	pizza.pizzas; 
+-- shows the size, type and price of each pizza, there are 96 kinds of pizzas (the 32 different types in 3 sizes each), "pizza_id" was made into 
+-- a primary key & "pizza_type_id" was made a foreign key, all columns changed to non-null in the DBM
     
 -- How many customers do we have each day? 
 SELECT 
@@ -23,6 +27,7 @@ FROM
 	orders
 GROUP BY 
 	date;
+-- shows the average customers for each day of 2015
 
 -- How many customers do we average per day?
 SELECT
