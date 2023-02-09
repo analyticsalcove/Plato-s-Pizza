@@ -34,6 +34,8 @@ SELECT
 	COUNT(order_id)/358 AS avg_daily_customers
 FROM 
 	orders;
+-- average daily customers: 59.64
+
 
 -- Are there any peak hours?
 SELECT
@@ -50,9 +52,10 @@ ORDER BY
 SELECT 
     SUM(quantity)/COUNT(distinct order_id) AS typical_pizza_order_total
 FROM 
-	order_details;
+    order_details;
+-- 2.30 average pizzas per order
 
--- Do we have any bestsellers? By Quantity
+-- Highest to lowest pizzas by Quantity
 SELECT 
 	pizzas.pizza_type_id,
 	SUM(order_details.quantity) AS sales 
@@ -60,10 +63,9 @@ FROM order_details
 LEFT JOIN pizzas 
 ON order_details.pizza_id = pizzas.pizza_id 
 GROUP BY pizzas.pizza_type_id 
-ORDER BY sum(order_details.quantity) desc
-LIMIT 3;   
+ORDER BY sum(order_details.quantity) DESC;   
     
--- Do we have any bestsellers? Revenue
+-- Highest to lowest pizzas by Revenue
 SELECT 
 	pizzas.pizza_type_id,
 	SUM((order_details.quantity)*(pizzas.price)) AS sales 
@@ -71,34 +73,21 @@ FROM order_details
 LEFT JOIN pizzas 
 ON order_details.pizza_id = pizzas.pizza_id 
 GROUP BY pizzas.pizza_type_id 
-ORDER BY SUM((order_details.quantity)*(pizzas.price)) desc
-LIMIT 3; 
-    
--- What is the worst selling pizza?
-SELECT 
-	pizzas.pizza_type_id,
-	SUM(order_details.quantity) AS sales 
-FROM 
-	order_details 
-LEFT JOIN pizzas 
-ON order_details.pizza_id = pizzas.pizza_id 
-GROUP BY 
-	pizzas.pizza_type_id 
-ORDER BY 
-	SUM(order_details.quantity)
-LIMIT 3;   
+ORDER BY SUM((order_details.quantity)*(pizzas.price)) DESC; 
     
 -- How many pizzas did we make this year?
 SELECT
 	SUM(quantity)
 FROM
 	order_details;
+-- 49,574 pizzas made in 2015
     
 -- How many orders were placed this year?
 SELECT
 	COUNT(order_id)
 FROM
 	orders;
+-- 21,350 pizzas made in 2015
     
 -- Total Revenue: How much money did we make this year? 
 SELECT
@@ -107,13 +96,7 @@ FROM
 	order_details
 LEFT JOIN pizzas 
 ON order_details.pizza_id = pizzas.pizza_id;
-
--- How much money did we make per pizza?
-SELECT
-	SUM(quantity*price)/SUM(order_details.quantity) AS price_per_pizza
-FROM order_details 
-LEFT JOIN pizzas 
-ON order_details.pizza_id = pizzas.pizza_id;    
+-- $817,860 total revenue
 
 -- How much money did we make per pizza? Average price per pizza:
 SELECT
@@ -121,18 +104,14 @@ SELECT
 FROM order_details 
 LEFT JOIN pizzas 
 ON order_details.pizza_id = pizzas.pizza_id; 
-
--- Variety of pizzas types 
-SELECT
-	DISTINCT(name) 
-FROM
-	pizza_types;
+-- average pizza price was $16.44
 	
 -- Count of variety of pizzas
 SELECT
 	COUNT(DISTINCT(name))
 FROM
 	pizza_types;
+-- 32 types of pizzas are sold
     
 -- Orders by pizza size
 SELECT
@@ -159,51 +138,3 @@ GROUP BY
 	date
 ORDER BY
 	SUM(quantity) DESC;
-
--- Can we indentify any seasonality in the sales?
-SELECT 
-	SUM(quantity), SUM(order_id)
-FROM 
-	orders
-JOIN 
-order_details 
-ON orders.order_id = order_details.order_id
-WHERE 
-	date BETWEEN CAST('2015-01-01' AS DATE)  AND  CAST('2015-02-30' AS DATE)  OR date >= CAST('2015-12-01' AS DATE) AS 'winter',
-WHERE
-	date BETWEEN CAST('2015-03-01' AS DATE) AND  CAST('2015-05-31' AS DATE) AS 'spring',
-WHERE
-	date BETWEEN CAST('2015-06-01' AS DATE) AND  CAST('2015-08-31' AS DATE) AS 'summer',
-WHERE
-	date BETWEEN CAST('2015-09-01' AS DATE) AND  CAST('2015-11-30' AS DATE) AS 'fall'
-GROUP BY
-	SUM(quantity)
-ORDER BY
-	SUM(quantity) DESC;
-	
-	
--- Seating and table availability throughout the day
--- So peak selling times are:
-SELECT 
-	time, COUNT(quantity) AS total_sales
-FROM
-	orders
-JOIN
-	order_details
-ON orders.order_id = order_details.order_id
-GROUP BY time
-ORDER BY COUNT(quantity) DESC;
-
--- Are there any pizzas we should take off the menu, or any promotions we could leverage?
-SELECT 
-	pizzas.pizza_type_id,
-	SUM(order_details.quantity) AS sales 
-FROM 
-	order_details 
-LEFT JOIN pizzas 
-ON order_details.pizza_id = pizzas.pizza_id 
-GROUP BY 
-	pizzas.pizza_type_id 
-ORDER BY 
-	sum(order_details.quantity)
-LIMIT 3; 
